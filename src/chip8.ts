@@ -67,7 +67,7 @@ const V = new Array<number>(16)
 
 // fetch - decode - execute
 
-let doRenderDisplay = false;
+let doRender = false;
 
 const execute = () => {
 
@@ -321,11 +321,8 @@ const execute = () => {
                         }
                     }
                 }
-
-
             }
-            doRenderDisplay = true;
-
+            doRender = true;
             break;
         case 0x0E:
 
@@ -367,19 +364,15 @@ const execute = () => {
                             // TODO:check if can be implemented on key up
                             for (let i = 0; i < 16; i++) {
                                 if (isKeyPressed(i)) {    
-                                    console.log('in loo', keyPressed)
                                     keyPressed = i;
                                     break
                                 }
                             }
 
                             if (keyPressed !== -1) {
-                                console.log(keyPressed)
                                 V[X] = keyPressed
                                 keyPressed = -1
-                            } else {
-                                console.log('staying');
-                                
+                            } else {                                
                                 programCounter -= 2
                             }
 
@@ -501,39 +494,47 @@ export const start = () => {
 
 
 
-const CHIP8_CLOCK_HZ = 700;  // CHIP-8 typical speed
-const FRAME_RATE = 60;       // Browser refresh rate (60 FPS)
+const CHIP8_CLOCK_HZ = 700;
+const FRAME_RATE = 60;
 const INSTRUCTIONS_PER_FRAME = Math.floor(CHIP8_CLOCK_HZ / FRAME_RATE);
+const TARGET_TICK_RATE = 1 / FRAME_RATE
 
 
 
 const run = () => {
 
-    const doRun = () => {
-        for (let i = 0; i < INSTRUCTIONS_PER_FRAME; i++) {
-            execute() 
+    let lastTime = 0
+    let accumulator = 0
+    const doRun = (currentTime: number) => {
+        
+        let deltaTime = (currentTime - lastTime) / 1000;
+        lastTime = currentTime;
+        accumulator += deltaTime;
+
+        for (let i = 0; i < INSTRUCTIONS_PER_FRAME && !doRender; i++) {
+            execute()
         }
-        if (delayTimer > 0) {
-            delayTimer--;
+
+        if (accumulator >= TARGET_TICK_RATE) {
+
+            if (delayTimer > 0) {
+                delayTimer--;
+            }
+            if (soundTimer > 0) {
+                soundTimer--;
+            }
+            renderDisplay(display);
+            doRender = false;    
+            accumulator -= TARGET_TICK_RATE
         }
-        if (soundTimer > 0) {
-            soundTimer--;
-        }
-        renderDisplay(display);    // Refresh screen
         
 
+        
+        
         requestAnimationFrame(doRun);
     }
+    lastTime = performance.now()
     requestAnimationFrame(doRun);
-
-    // setInterval(() => {
-    //     for (let i = 0; i < INSTRUCTIONS_PER_FRAME; i++) {
-    //         execute() 
-    //     }
-    
-    //     renderDisplay(display);    // Refresh screen
-    // }, 1000 / FRAME_RATE)
-
 }
 
 
