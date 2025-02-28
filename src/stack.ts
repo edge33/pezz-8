@@ -7,33 +7,32 @@ class Uint16Stack extends Uint16Array {
 
     push(value: number): void {
         if (this._top + 1 >= this.length) {
-          throw new Error("Stack overflow");
+            throw new Error('Stack overflow')
         }
-        this[++this._top] = value;
-      }
-    
-    pop(): number {
-    if (this._top < 0) {
-        throw new Error("Stack underflow");
+        this[++this._top] = value
     }
-    return this[this._top--];
+
+    pop(): number {
+        if (this._top < 0) {
+            throw new Error('Stack underflow')
+        }
+        return this[this._top--]
     }
 
     peek(): number {
-    if (this._top < 0) {
-        throw new Error("Stack is empty");
-    }
-    return this[this._top];
+        if (this._top < 0) {
+            throw new Error('Stack is empty')
+        }
+        return this[this._top]
     }
 
     isEmpty(): boolean {
-    return this._top === -1;
+        return this._top === -1
     }
 
     isFull(): boolean {
-    return this._top + 1 === this.length;
+        return this._top + 1 === this.length
     }
-
 }
 
 export default Uint16Stack
