@@ -18,11 +18,13 @@ const keyMap: { [key: string]: number } = {
 }
 
 const keyState: boolean[] = new Array(16).fill(false)
+const keyReleased: boolean[] = new Array(16).fill(false)
 
 document.addEventListener('keydown', (event: KeyboardEvent) => {
     const key = keyMap[event.code]
     if (key !== undefined) {
         keyState[key] = true
+        keyReleased[key] = false
         event.preventDefault() // Prevent default behavior (e.g., scrolling)
     }
 })
@@ -31,10 +33,14 @@ document.addEventListener('keyup', (event) => {
     const key = keyMap[event.code]
     if (key !== undefined) {
         keyState[key] = false
+        keyReleased[key] = true
         event.preventDefault()
     }
 })
 
 const isKeyPressed = (chip8Key: number) => keyState[chip8Key]
+const isKeyReleased = (chip8Key: number) => keyReleased[chip8Key]
 
-export { isKeyPressed }
+const resetKeyReleased = () => keyReleased.fill(false)
+
+export { isKeyPressed, isKeyReleased, resetKeyReleased }

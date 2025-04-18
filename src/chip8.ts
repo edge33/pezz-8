@@ -1,6 +1,6 @@
 import { renderDisplay } from './display/display'
 import { DISPLAY_HEIGHT, DISPLAY_WIDTH } from './display/specs'
-import { isKeyPressed } from './keyboard'
+import { isKeyPressed, isKeyReleased, resetKeyReleased } from './keyboard'
 import Uint16Stack from './stack'
 
 const RAM = new Uint8Array(4096)
@@ -119,7 +119,8 @@ const stack = new Uint16Stack(16)
 let delayTimer = 0 & 0xffff
 let soundTimer = 0 & 0xffff
 
-let keyPressed = -1
+let holdForKey = false
+let keyReleased = -1
 
 const V = new Array<number>(16)
 
@@ -362,17 +363,22 @@ const execute = () => {
                             break
                         }
                         case 0x0a: {
-                            // TODO:check if can be implemented on key up
+                            if (!holdForKey) {
+                                resetKeyReleased()
+                            }
+                            holdForKey = true
+
                             for (let i = 0; i < 16; i++) {
-                                if (isKeyPressed(i)) {
-                                    keyPressed = i
+                                if (isKeyReleased(i)) {
+                                    keyReleased = i
                                     break
                                 }
                             }
 
-                            if (keyPressed !== -1) {
-                                V[X] = keyPressed
-                                keyPressed = -1
+                            if (keyReleased !== -1) {
+                                V[X] = keyReleased
+                                keyReleased = -1
+                                holdForKey = false
                             } else {
                                 programCounter -= 2
                             }
